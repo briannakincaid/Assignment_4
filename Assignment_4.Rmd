@@ -1,0 +1,162 @@
+---
+title: "Assignment 4"
+author: "Brianna Kincaid"
+date: "February 20, 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+```
+
+## 10.5 Exercises 
+
+1. How can you tell if an object is a tibble? (Hint: try printing mtcars, which is a regular data frame).
+
+```{r}
+mtcars
+class(mtcars)
+class(as_tibble(mtcars))
+```
+
+Tibbles show the class of each column and also do not show all the rows.They also have the tbl_df and tbl_.
+
+2. Compare and contrast the following operations on a data.frame and equivalent tibble. What is different? Why might the default data frame behaviours cause you frustration?
+
+Data frame:
+```{r}
+df <- data.frame(abc = 1, xyz = "a")
+df$x
+```
+This can accidentally return the wrong result. It gives df$xyz.
+
+```{r}
+df[, "xyz"]
+```
+
+```{r}
+df[, c("abc", "xyz")]
+```
+
+Tibble:
+```{r}
+tbl <- as_tibble(df)
+tbl$x
+```
+
+```{r}
+tbl[, "xyz"]
+```
+
+```{r}
+tbl[, c("abc", "xyz")]
+```
+
+3. If you have the name of a variable stored in an object, e.g. var <- "mpg", how can you extract the reference variable from a tibble?
+
+You use the double bracket. 
+
+4. Practice referring to non-syntactic names in the following data frame by:
+
+```{r}
+annoying <- tibble(`1` = 1:10, `2` = `1` * 2 + rnorm(length(`1`)))
+```
+
+  (a) Extracting the variable called 1.
+  
+```{r}
+annoying[["1"]]
+```
+
+  (b) Plotting a scatterplot of 1 vs 2.
+
+```{r}
+ggplot(annoying, aes(x = `1`, y = `2`)) +
+  geom_point()
+```
+  
+  (c) Creating a new column called 3 which is 2 divided by 1.
+
+```{r}
+annoying[["3"]] <- annoying[["2"]] / annoying[["1"]]
+```
+
+  (d) Renaming the columns to one, two and three.
+  
+```{r}
+annoying <- rename(annoying, one = `1`, two = `2`, three = `3`)
+```
+
+5. What does tibble::enframe() do? When might you use it?
+
+It converts named vectors or lists to two-column data frames.
+
+```{r}
+enframe(c(a = 5, b = 7))
+```
+
+6. What option controls how many additional column names are printed at the footer of a tibble?
+
+The n_extra option in the print function, print.tbl_df, determines the number of additional column names printed at the footer of the tibble. 
+
+## 12.6.1 Exercises 
+
+The tidyr::who dataset contains tuberculosis (TB) cases broken down by year, country, age, gender, and diagnosis method.
+
+```{r}
+who1 <- who %>%
+  gather(new_sp_m014:newrel_f65, key="key", value = "cases", na.rm=TRUE)
+
+who2 <- who1 %>%
+  mutate(key=stringr::str_replace(key,"newrel", "new_rel"))
+
+who3 <- who2 %>%
+  separate(key,c("new", "type", "sexage"), sep= "_")
+
+who3 %>% 
+  count(new)
+
+who4 <- who3 %>%
+  select(-new,-iso2, -iso3)
+
+who5 <- who4 %>%
+  separate(sexage, c("sex", "age"), sep = 1)
+```
+
+1. In this case study I set na.rm = TRUE just to make it easier to check that we had the correct values. Is this reasonable? Think about how missing values are represented in this dataset. Are there implicit missing values? What’s the difference between an NA and zero?
+
+Removing the missing values (NA) is reasonable because we can reasonably treat explicitly missing values the same as implicitly missing values. Zero's explicitly indicate no cases of TB, while NA represents missing data. 
+
+2. What happens if you neglect the mutate() step? (mutate(key = stringr::str_replace(key, "newrel", "new_rel")))
+
+separate emits the warning “too few values”, and if we check the rows for keys beginning with "newrel_", we see that sexage is messing, and type = m014.
+
+```{r}
+who3a <- who1 %>%
+  separate(key, c("new", "type", "sexage"), sep = "_")
+  
+filter(who3a, new == "newrel") %>% head()
+```
+
+3. I claimed that iso2 and iso3 were redundant with country. Confirm this claim.
+
+```{r}
+select(who3, country, iso2, iso3) %>%
+  distinct() %>%
+  group_by(country) %>%
+  filter(n() > 1)
+```
+
+4. For each country, year, and sex compute the total number of cases of TB. Make an informative visualisation of the data.
+
+```{r}
+who5 %>%
+  group_by(country, year, sex) %>%
+  filter(year > 1995) %>%
+  summarise(cases = sum(cases)) %>%
+  unite(country_sex, country, sex, remove = FALSE) %>%
+  ggplot(aes(x = year, y = cases, group = country_sex, colour = sex)) +
+  geom_line()
+```
