@@ -1,9 +1,10 @@
 ## Assignment 4
 Brianna Kincaid
 
-### Done:
-Exercises 10.5 and 12.6.1 in R for Data Science.
+### Assignment 4, Part 1: Exercises 10.5 and 12.6.1 in R for Data Science 
+-Assignment_4_pt1.Rmd
+-Assignment_4_pt1.pdf
 
-### To be added: 
-- The conversion from Table 4 to Table 6 (pew.r)
-- The conversion from Table 7 to Table 8 (billboard.r)
+### Assignment 4, Part 2: Conversions from Table 4 to Table 6 and from Table 7 to Table 8
+- Assignment_4_pt2.Rmd
+- Assignment_4_pt2.pdf
