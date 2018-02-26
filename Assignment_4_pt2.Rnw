@@ -14,6 +14,18 @@
 
 \section{Table 4 to Table 6}
 
+\subsection{Load Data}
+<<>>=
+library(foreign)
+library(stringr)
+library(plyr)
+library(reshape2)
+source("xtable.r")
+
+pew <- read.spss("pew.sav")
+pew <- as.data.frame(pew)
+@
+
 $$s\begin{tabular}{lrrrrrr}
   \toprule
  religion & $<$\$10k & \$10-20k & \$20-30k & \$30-40k & \$40-50k & \$50-75k \\ 
@@ -33,19 +45,8 @@ $$s\begin{tabular}{lrrrrrr}
 
 Table 4: The first ten rows of data on income and religion from the Pew Forum. Three columns, $\$75-100k$ and $>150k$, have been omitted.
 
+\subsection{Tidy Data}
 <<>>=
-library(foreign)
-library(stringr)
-library(plyr)
-library(reshape2)
-source("xtable.r")
-
-# Load data -----------------------------------------------------------------
-
-pew <- read.spss("pew.sav")
-pew <- as.data.frame(pew)
-
-
 religion <- pew[c("q16", "reltrad", "income")]
 religion$reltrad <- as.character(religion$reltrad)
 religion$reltrad <- str_replace(religion$reltrad, " Churches", "")
@@ -73,11 +74,6 @@ counts <- count(religion, c("reltrad", "income"))
 names(counts)[1] <- "religion"
 
 xtable(counts[1:10, ], file = "pew-clean.tex")
-
-# Convert into the form in which I originally saw it -------------------------
-
-raw <- dcast(counts, religion ~ income)
-xtable(raw[1:10, 1:7], file = "pew-raw.tex")
 @
 
 
@@ -102,6 +98,13 @@ Table 6: The first ten rows of the tidied Pew survery dataset on income and reli
 
 \section{Table 7 to Table 8}
 
+\subsection{Load Data}
+
+<<>>=
+raw <- read.csv("billboard.csv")
+@
+
+
 $$\begin{tabular}{rllllrrr}
   \toprule
  year & artist & track & time & date.entered & wk1 & wk2 & wk3 \\ 
@@ -119,6 +122,8 @@ $$\begin{tabular}{rllllrrr}
 
 Table 7: The first eight Billboard top hits for 2000. Other columns not shown are wk4, wk5, ..., wk75.
 
+\subsection{Tidy Data}
+
 <<>>=
 options(stringsAsFactors = FALSE)
 library(lubridate)
@@ -127,7 +132,7 @@ library(stringr)
 library(plyr)
 source("xtable.r")
 
-raw <- read.csv("billboard.csv")
+
 raw <- raw[, c("year", "artist.inverted", "track", "time", "date.entered", "x1st.week", "x2nd.week", "x3rd.week", "x4th.week", "x5th.week", "x6th.week", "x7th.week", "x8th.week", "x9th.week", "x10th.week", "x11th.week", "x12th.week", "x13th.week", "x14th.week", "x15th.week", "x16th.week", "x17th.week", "x18th.week", "x19th.week", "x20th.week", "x21st.week", "x22nd.week", "x23rd.week", "x24th.week", "x25th.week", "x26th.week", "x27th.week", "x28th.week", "x29th.week", "x30th.week", "x31st.week", "x32nd.week", "x33rd.week", "x34th.week", "x35th.week", "x36th.week", "x37th.week", "x38th.week", "x39th.week", "x40th.week", "x41st.week", "x42nd.week", "x43rd.week", "x44th.week", "x45th.week", "x46th.week", "x47th.week", "x48th.week", "x49th.week", "x50th.week", "x51st.week", "x52nd.week", "x53rd.week", "x54th.week", "x55th.week", "x56th.week", "x57th.week", "x58th.week", "x59th.week", "x60th.week", "x61st.week", "x62nd.week", "x63rd.week", "x64th.week", "x65th.week", "x66th.week", "x67th.week", "x68th.week", "x69th.week", "x70th.week", "x71st.week", "x72nd.week", "x73rd.week", "x74th.week", "x75th.week", "x76th.week")]
 names(raw)[2] <- "artist"
 
@@ -156,9 +161,10 @@ clean <- clean[c("year", "artist", "time", "track", "date", "week", "rank")]
 clean_out <- mutate(clean, 
                     date = as.character(date))
 xtable(clean_out[1:15, ], "billboard-clean.tex")
+@
 
-# Normalisation --------------------------------------------------------------
-
+\subsubsection{Normalization}
+<<>>=
 song <- unrowname(unique(clean[c("artist", "track", "time")]))
 song$id <- 1:nrow(song)
 
@@ -194,6 +200,6 @@ $$\begin{tabular}{rllllrr}
    \bottomrule
 \end{tabular}$$
 
-Table 8: First fifteen rows of the tidied Billboard dataset. The date column does not appear in the original table, but can be computer from date.entered and week.
+Table 8: First fifteen rows of the tidied Billboard dataset. The date column does not appear in the original table, but can be computed from date.entered and week.
 
 \end{document}
