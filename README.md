@@ -5,4 +5,5 @@ Brianna Kincaid
 Exercises 10.5 and 12.6.1 in R for Data Science.
 
 ### To be added: 
-- The conversions from table 4 to table 6 and from table 7 to table 8 in the Tidy Data article
+- The conversion from Table 4 to Table 6 (pew.r)
+- The conversion from Table 7 to Table 8 (billboard.r)
